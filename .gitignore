@@ -1,0 +1,28 @@
+# Devenv
+.devenv*
+devenv.local.nix
+devenv.local.yaml
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
+
+# vscode
+.vscode
+
+#pycache
+__pycache__/
+*.pyc
+
+*/models
+
+# agent memory / working notes
+.agent_memory/
+
+dist
+
+CLAUDE.md
+
+.DS_Store
