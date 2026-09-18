@@ -1,0 +1,26 @@
+[
+    {
+        "time_sec": 0.0,
+        "yaw": 0.0,
+        "pitch": 0.0,
+        "roll": 0.0
+    },
+    {
+        "time_sec": 1.25,
+        "yaw": 45.0,
+        "pitch": 0.0,
+        "roll": 0.0
+    },
+    {
+        "time_sec": 2.5,
+        "yaw": -45.0,
+        "pitch": 0.0,
+        "roll": 0.0
+    },
+    {
+        "time_sec": 3.75,
+        "yaw": 0.0,
+        "pitch": 0.0,
+        "roll": 0.0
+    }
+]

@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cleosdk"
+version = "0.3.0"
+description = "Python SDK for commanding the Cleo robot head"
+requires-python = ">=3.13"
+
+# Only what the client needs on the wire and for the video/pose maths. The servo,
+# trajectory and audio stacks are the Pi daemon's problem, not the SDK user's.
+dependencies = [
+    "pyzmq",
+    "numpy",
+    "scipy",
+    "opencv-python",
+]
+
+# pyproject.toml lives beside the package dir, so this resolves to cleosdk/cleosdk
+# and the wheel gets `cleosdk/cleo.py` at its root -> `from cleosdk import RobotHead`.
+[tool.hatch.build.targets.wheel]
+packages = ["cleosdk"]

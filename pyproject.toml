@@ -1,0 +1,53 @@
+[project]
+name = "cleodev"
+version = "0.3.0"
+requires-python = ">=3.13"
+dependencies = [
+    "pyzmq",
+    "dynamixel-sdk",
+    # >=0.19.4: 0.14 through 0.17 publish sdists only, and their CMake config uses
+    # the `cmake.targets` key that scikit-build-core >= 0.10 rejects -- so they fail
+    # to build and take the whole `uv sync` down with them. 0.19.4 ships wheels for
+    # macOS/Windows/x86_64-Linux and builds cleanly from source elsewhere (the Pi's
+    # aarch64 Linux has no wheel at any version and always compiles).
+    "ruckig>=0.19.4",
+    "numpy",
+    "scipy",
+    "opencv-python",
+    # Utilities
+    "pydantic", # Great for validating JSON messages between PC and Pi
+    "matplotlib",
+    "SpeechRecognition",
+    "pyttsx3",
+    "vosk<=0.3.44",
+    "pyaudio",
+    # Direction of arrival: the ReSpeaker reports it over a vendor USB control
+    # interface, not through the audio stream. Optional at runtime -- audio.py
+    # imports it guardedly and simply reports no direction without it.
+    "pyusb",
+    # The SDK, installed editable from ./cleosdk (see [tool.uv.sources] below) so
+    # `import cleosdk` resolves to the real package instead of the empty namespace
+    # directory you get from a bare sys.path entry.
+    "cleosdk",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+# Optional: if you add OpenCV or heavy AI tools later, uv handles them gracefully
+
+[tool.uv.sources]
+# Pull cleosdk from the in-repo source as an editable install rather than PyPI, so
+# edits under cleosdk/ take effect live without a reinstall. This replaces the old
+# PYTHONPATH hack in devenv.nix.
+cleosdk = { path = "cleosdk", editable = true }
+
+# cleodev is the development environment for the whole repo, not something to ship:
+# it exists to pull in the Pi-side stack (servos, Ruckig, audio) alongside the SDK.
+# The SDK is published from cleosdk/pyproject.toml as its own distribution, so this
+# project must not build it too -- two packages claiming `cleosdk` would shadow
+# each other, and the loser would be whichever pip installed last.
+[tool.hatch.build.targets.wheel]
+bypass-selection = true

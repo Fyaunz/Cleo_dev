@@ -1,0 +1,14 @@
+# Stable name for the Dynamixel USB serial adapter.
+#
+# /dev/ttyUSB* numbering follows enumeration order, so the adapter can move
+# between reboots if anything else USB-serial is attached. This rule pins it to
+# /dev/cleo-servos, which is what the systemd unit passes as CLEO_SERIAL.
+#
+# Find the values for your adapter:
+#   udevadm info -a -n /dev/ttyUSB0 | grep -E 'idVendor|idProduct|serial'
+# deploy/install.sh fills them in automatically.
+#
+# TAG+="systemd" guarantees systemd exposes the device as a .device unit, which
+# is what the unit file's After=dev-cleo\x2dservos.device orders against.
+SUBSYSTEM=="tty", ATTRS{idVendor}=="@ID_VENDOR@", ATTRS{serial}=="@ID_SERIAL@", \
+  SYMLINK+="cleo-servos", GROUP="dialout", MODE="0660", TAG+="systemd"

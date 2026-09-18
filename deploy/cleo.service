@@ -1,0 +1,48 @@
+[Unit]
+Description=Cleo robot head daemon
+Documentation=https://github.com/Fyaunz/Cleo
+# The daemon binds tcp://*:5555-5559, so it does not need an address to be
+# assigned before it starts -- network.target is enough, network-online.target
+# would only delay boot.
+After=network.target
+
+# Wait for the servo adapter. The name comes from 99-cleo-servos.rules; systemd
+# escapes '-' in device names as '\x2d', so /dev/cleo-servos is
+# dev-cleo\x2dservos.device. If the adapter is missing the unit still starts and
+# Restart=always retries until it appears. Swap Wants= for BindsTo= if you would
+# rather have the daemon stop outright when the adapter is unplugged.
+Wants=dev-cleo\x2dservos.device
+After=dev-cleo\x2dservos.device
+
+[Service]
+Type=simple
+User=@CLEO_USER@
+# dialout: the USB serial adapter. video: the camera -- needed whether
+# VideoStreamer opens it through OpenCV or through the rpicam-vid subprocess,
+# which inherits these groups. audio: the ReSpeaker. Without it PortAudio finds
+# no devices at all and start_audio fails with a device list that looks empty
+# rather than wrong.
+SupplementaryGroups=dialout video audio
+WorkingDirectory=@CLEO_ROOT@
+
+# -u keeps stdout unbuffered. Without it Python block-buffers stdout because
+# journald hands it a pipe rather than a tty, and every print() -- including the
+# ones reporting hardware faults -- sits in the buffer instead of reaching the
+# journal.
+ExecStart=@CLEO_PYTHON@ -u @CLEO_ROOT@/pi_controller/main.py
+
+# Overrides the default in main.py so the same checkout runs unmodified on the
+# development machine and on the Pi.
+Environment=CLEO_SERIAL=/dev/cleo-servos
+
+# main.py handles SIGTERM and unwinds through its finally block, which disables
+# servo torque and closes the serial port. Give it room to finish before systemd
+# escalates to SIGKILL.
+KillSignal=SIGTERM
+TimeoutStopSec=10
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
